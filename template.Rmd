@@ -1,0 +1,6 @@
+---
+title: "Simple document"
+output: github_document
+---
+
+I'm an R Markdown document! 
