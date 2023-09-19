@@ -3,4 +3,100 @@ title: "Simple document"
 output: github_document
 ---
 
-I'm an R Markdown document! 
+
+Let's import the 'FAS_litters.csv' csv using a relative path. Tidyverse using readr package (use for csv files). Readxl use for excel files.
+
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(haven)
+```
+
+```{r}
+litters_df =
+  read_csv("data/FAS_litters.csv")
+
+litters_df =
+  janitor::clean_names(litters_df)
+```
+
+Let's import the 'FAS_pups.csv' csv using a relative path. Janitor clean names makes all variable names snakecase.
+
+```{r}
+pups_df = 
+  read_csv("data/FAS_pups.csv")
+
+pups_df = 
+  janitor::clean_names(pups_df)
+
+names(pups_df)
+```
+
+
+## look at data
+
+```{r}
+litters_df
+
+head(litters_df)
+
+tail(litters_df)
+```
+
+YOu can use view. Pull up separate window too look at dataset.
+
+```{r, eval = FALSE}
+view(litters_df)
+```
+
+
+Look at a data summary. Structure tells you column, size, col types. Skim has neat summary of data; helpful to skim looking at dataset for first time.
+```{r}
+str(litters_df)
+
+skimr::skim(litters_df)
+```
+
+Practice with read_*
+```{r}
+litters_df = 
+  read_csv("data/FAS_litters.csv",
+           skip = 10, col_names = FALSE)
+```
+
+Look at NA values
+```{r}
+litters_df = 
+  read_csv(
+    "data/FAS_litters.csv",
+    na = c("NA", 19)
+  )
+```
+
+Column types
+```{r}
+litters_df = 
+  read_csv("data/FAS_litters.csv",
+           col_types = 
+             cols(
+               Group = col_factor(),
+               `GD0 weight` = col_character()
+             ))
+```
+
+##Import other types of files.
+Import a xlsx file first.
+
+```{r}
+mlb_df = 
+  read_excel("data/mlb11.xlsx")
+```
+
+Import a SAS file.
+```{r}
+pulse_df = 
+  read_sas("data/public_pulse_data.sas7bdat")
+```
+
+
