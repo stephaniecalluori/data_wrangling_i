@@ -83,8 +83,51 @@ filter(litters_df, !(group == "Con7"))
 
 filter(litters_df, group == "Con7" | group == "Con8", gd0_weight > 20)
 
+```
+
+## `mutate`
+
+this is used to add or change variables.
+
+```{r}
+mutate(litters_df, wt_gain = gd18_weight - gd0_weight)
+
+mutate(litters_df, group = str_to_lower(group))
+
+mutate(
+  litters_df,
+  wt_gain = gd18_weight - gd0_weight,
+  group = str_to_lower(group)
+)
+```
+
+## Missing values
+
+```{r}
+drop_na(litters_df)
+drop_na(litters_df, gd0_weight)
 
 ```
+
+## `arrange`
+
+Can arrange by one or multiple columns.
+
+```{r}
+arrange(litters_df, gd0_weight)
+arrange(litters_df, group, gd0_weight)
+```
+
+
+## pipes!
+```{r}
+litter_df = 
+  read_csv("data/FAS_litters.csv") |> 
+  janitor::clean_names() |> 
+  select(-starts_with("pups")) |> 
+  drop_na(gd0_weight)
+```
+
 
 
 
