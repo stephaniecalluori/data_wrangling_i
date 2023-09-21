@@ -1,0 +1,90 @@
+---
+title: "Data manipulation"
+output: html_document
+---
+
+```{r}
+library(readr)
+library(tidyverse)
+```
+
+
+Import FAS litters and pups.
+
+```{r}
+litters_df = 
+  read_csv("data/FAS_litters.csv")
+litters_df = janitor::clean_names(litters_df)
+```
+
+```{r}
+pups_df = 
+  read_csv("data/FAS_pups.csv")
+pups_df = janitor::clean_names(pups_df)
+```
+
+## `select` is used to select columns
+
+```{r}
+select(litters_df, group, litter_number, gd0_weight)
+
+select(litters_df, group, gd0_weight:gd_of_birth)
+
+select(litters_df, group, starts_with("pups"))
+
+select(litters_df, -litter_number)
+
+select(litters_df, -starts_with("gd"))
+
+select(litters_df, group, litter_id = litter_number)
+
+select(litters_df, group, litter_id = litter_number, everything())
+```
+
+# `select` vs `pull`
+# select will always give you a data frame; output is a dataframe
+# pull - extract column from data frame, transforms it into a vector, so it's no longer in your dataframe; output is a vector; use pull instead of a $
+
+```{r}
+select(litters_df, group)
+pull(litters_df, group)
+```
+
+# `rename` function
+rename(litters_df, litter_id = litter_number)
+
+# `relocate` function
+```{r}
+relocate(litters_df, litter_number)
+```
+
+# Exercise with pups_df
+```{r}
+colnames(pups_df)
+pups_subset <- select(pups_df, litter_number, sex, pd_ears)
+```
+
+## `filter`
+
+get rid of rows using `filter`
+
+```{r}
+filter(litters_df, group == "Mod8")
+
+filter(litters_df, group != "Con7")
+
+filter(litters_df, gd0_weight > 20)
+
+filter(litters_df, group == "Con7" | group == "Con8")
+
+filter(litters_df, group %in% c("Con7", "Con8"))
+
+filter(litters_df, !(group == "Con7"))
+
+filter(litters_df, group == "Con7" | group == "Con8", gd0_weight > 20)
+
+
+```
+
+
+
