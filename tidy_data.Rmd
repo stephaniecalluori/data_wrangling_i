@@ -1,0 +1,149 @@
+---
+title: "Tidy data"
+output: github_document
+---
+
+```{r}
+library(tidyverse)
+```
+
+## PULSE data; switch from wide to long format
+
+```{r}
+pulse_df = 
+  haven::read_sas("data/public_pulse_data.sas7bdat") |> 
+  janitor::clean_names() |> 
+  pivot_longer(
+    bdi_score_bl:bdi_score_12m,
+    names_to = "visit",
+    values_to = "bdi_score",
+    names_prefix = "bdi_score_"
+  ) |> 
+  mutate(
+    visit = replace(visit, visit == "bl", "00m")
+  )
+```
+
+
+Import FAS litters and pups.
+
+```{r}
+litters_df = 
+  read_csv("data/FAS_litters.csv")
+litters_df = janitor::clean_names(litters_df)
+```
+
+```{r}
+pups_df = 
+  read_csv("data/FAS_pups.csv")
+pups_df = janitor::clean_names(pups_df)
+```
+
+## `select` is used to select columns
+
+```{r}
+select(litters_df, group, litter_number, gd0_weight)
+
+select(litters_df, group, gd0_weight:gd_of_birth)
+
+select(litters_df, group, starts_with("pups"))
+
+select(litters_df, -litter_number)
+
+select(litters_df, -starts_with("gd"))
+
+select(litters_df, group, litter_id = litter_number)
+
+select(litters_df, group, litter_id = litter_number, everything())
+```
+
+# `select` vs `pull`
+# select will always give you a data frame; output is a dataframe
+# pull - extract column from data frame, transforms it into a vector, so it's no longer in your dataframe; output is a vector; use pull instead of a $
+
+```{r}
+select(litters_df, group)
+pull(litters_df, group)
+```
+
+# `rename` function
+rename(litters_df, litter_id = litter_number)
+
+# `relocate` function
+```{r}
+relocate(litters_df, litter_number)
+```
+
+# Exercise with pups_df
+```{r}
+colnames(pups_df)
+pups_subset <- select(pups_df, litter_number, sex, pd_ears)
+```
+
+## `filter`
+
+get rid of rows using `filter`
+
+```{r}
+filter(litters_df, group == "Mod8")
+
+filter(litters_df, group != "Con7")
+
+filter(litters_df, gd0_weight > 20)
+
+filter(litters_df, group == "Con7" | group == "Con8")
+
+filter(litters_df, group %in% c("Con7", "Con8"))
+
+filter(litters_df, !(group == "Con7"))
+
+filter(litters_df, group == "Con7" | group == "Con8", gd0_weight > 20)
+
+```
+
+## `mutate`
+
+this is used to add or change variables.
+
+```{r}
+mutate(litters_df, wt_gain = gd18_weight - gd0_weight)
+
+mutate(litters_df, group = str_to_lower(group))
+
+mutate(
+  litters_df,
+  wt_gain = gd18_weight - gd0_weight,
+  group = str_to_lower(group)
+)
+```
+
+## Missing values
+
+```{r}
+drop_na(litters_df)
+drop_na(litters_df, gd0_weight)
+
+```
+
+## `arrange`
+
+Can arrange by one or multiple columns.
+
+```{r}
+arrange(litters_df, gd0_weight)
+arrange(litters_df, group, gd0_weight)
+```
+
+
+## pipes!
+```{r}
+litter_df = 
+  read_csv("data/FAS_litters.csv") |> 
+  janitor::clean_names() |> 
+  select(-starts_with("pups")) |> 
+  drop_na(gd0_weight)
+```
+
+
+
+
