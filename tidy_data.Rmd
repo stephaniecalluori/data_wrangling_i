@@ -5,6 +5,7 @@ output: github_document
 
 ```{r}
 library(tidyverse)
+library(readr)
 ```
 
 ## PULSE data; switch from wide to long format
@@ -24,13 +25,26 @@ pulse_df =
   )
 ```
 
-
 Import FAS litters and pups.
 
 ```{r}
 litters_df = 
-  read_csv("data/FAS_litters.csv")
-litters_df = janitor::clean_names(litters_df)
+  read_csv("data/FAS_litters.csv") |> 
+  janitor::clean_names() |> 
+  select(litter_number, gd0_weight, gd18_weight) |> 
+  pivot_longer(
+    gd0_weight:gd18_weight,
+    names_to = "gd",
+    values_to = "weight",
+  ) |> 
+  mutate(
+    gd = case_match(
+      gd,
+      "gd0_weight" ~ 0,
+      "gd18_weight" ~ 18
+    )
+  )
+  
 ```
 
 ```{r}
@@ -39,110 +53,41 @@ pups_df =
 pups_df = janitor::clean_names(pups_df)
 ```
 
-## `select` is used to select columns
+
+## LotR example; the csv has 3 separate tables in one excel sheet
+Import LoTR words data. Add movie name variable so we don't lose this information when we combine datasets.
 
 ```{r}
-select(litters_df, group, litter_number, gd0_weight)
+fellowship_df = 
+  readxl::read_excel("data/LotR_Words.xlsx", range = "B3:D6") |> 
+  mutate(movie = "fellowship")
 
-select(litters_df, group, gd0_weight:gd_of_birth)
+two_towers_df = 
+  readxl::read_excel("data/LotR_Words.xlsx", range = "F3:H6") |> 
+  mutate(movie = "two towers")
 
-select(litters_df, group, starts_with("pups"))
-
-select(litters_df, -litter_number)
-
-select(litters_df, -starts_with("gd"))
-
-select(litters_df, group, litter_id = litter_number)
-
-select(litters_df, group, litter_id = litter_number, everything())
+return_of_king_df = 
+  readxl::read_excel("data/LotR_Words.xlsx", range = "J3:L6") |> 
+  mutate(movie = "return of the king")
 ```
 
-# `select` vs `pull`
-# select will always give you a data frame; output is a dataframe
-# pull - extract column from data frame, transforms it into a vector, so it's no longer in your dataframe; output is a vector; use pull instead of a $
+Can stack these data sets to combine. Movie information has been observed.
 
 ```{r}
-select(litters_df, group)
-pull(litters_df, group)
-```
-
-# `rename` function
-rename(litters_df, litter_id = litter_number)
-
-# `relocate` function
-```{r}
-relocate(litters_df, litter_number)
-```
-
-# Exercise with pups_df
-```{r}
-colnames(pups_df)
-pups_subset <- select(pups_df, litter_number, sex, pd_ears)
-```
-
-## `filter`
-
-get rid of rows using `filter`
-
-```{r}
-filter(litters_df, group == "Mod8")
-
-filter(litters_df, group != "Con7")
-
-filter(litters_df, gd0_weight > 20)
-
-filter(litters_df, group == "Con7" | group == "Con8")
-
-filter(litters_df, group %in% c("Con7", "Con8"))
-
-filter(litters_df, !(group == "Con7"))
-
-filter(litters_df, group == "Con7" | group == "Con8", gd0_weight > 20)
-
-```
-
-## `mutate`
-
-this is used to add or change variables.
-
-```{r}
-mutate(litters_df, wt_gain = gd18_weight - gd0_weight)
-
-mutate(litters_df, group = str_to_lower(group))
-
-mutate(
-  litters_df,
-  wt_gain = gd18_weight - gd0_weight,
-  group = str_to_lower(group)
-)
-```
-
-## Missing values
-
-```{r}
-drop_na(litters_df)
-drop_na(litters_df, gd0_weight)
-
-```
-
-## `arrange`
-
-Can arrange by one or multiple columns.
-
-```{r}
-arrange(litters_df, gd0_weight)
-arrange(litters_df, group, gd0_weight)
-```
-
-
-## pipes!
-```{r}
-litter_df = 
-  read_csv("data/FAS_litters.csv") |> 
+lotr_df =
+  bind_rows(fellowship_df, two_towers_df, return_of_king_df) |> 
   janitor::clean_names() |> 
-  select(-starts_with("pups")) |> 
-  drop_na(gd0_weight)
+  pivot_longer(
+    male:female,
+    names_to = "gender",
+    values_to = "word"
+  ) |> 
+  relocate(movie)
+
 ```
+
+
+
 
 
 
